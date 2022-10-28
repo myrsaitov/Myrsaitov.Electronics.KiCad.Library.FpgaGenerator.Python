@@ -4,11 +4,9 @@ lyb_content = []
 
 
 def create_symbol(
-        file_name,
-        reference,  # Обозначение на схеме
-        component_name,  # Наименование компонента
-        footprint,  # Футпринт компонента
-        datasheet,  # Datasheet URL
+        library_version,  # Версия библиотеки KiCAD
+        file_name,  # Имя файла
+        properties,  # Общие свойства компонента
         part_count,  # Количество частей
         in_bom=True,  # Находится ли в списке BOM
         on_board=True  # Находится ли на плате
@@ -16,10 +14,8 @@ def create_symbol(
 
     # Добавляет начало библиотеки
     add_begin(
-        reference,
-        component_name,
-        footprint,
-        datasheet,
+        library_version,
+        properties,
         in_bom,
         on_board
     )
@@ -39,19 +35,28 @@ def create_symbol(
 
 # Добавляет начало библиотеки
 def add_begin(
-        reference,
-        component_name,
-        footprint,
-        datasheet,
+        library_version,
+        properties,
         in_bom,
         on_board
 ):
 
     # Версия библиотеки
-    lyb_content.append('(kicad_symbol_lib (version 20211014) (generator kicad_symbol_editor)\n')
+    lyb_content.append(f'(kicad_symbol_lib (version {library_version}) (generator kicad_symbol_editor)\n')
 
     # Название символа компонента
-    symbol_str = '  (symbol ' + '"' + component_name + '"'
+    component_name = ''
+
+    for data in properties:
+        if data[0] == 'Value':
+            component_name = data[1]
+
+    if not component_name:
+
+        print('Error! Component Name is not found!')
+        return
+
+    symbol_str = f'  (symbol "{component_name}"'
 
     if in_bom:
         symbol_str += ' (in_bom yes)'
@@ -67,53 +72,18 @@ def add_begin(
 
     lyb_content.append(symbol_str)
 
-    # Свойство "Reference"
-    property_id = 0
-    lyb_content.append(
-        ''.join([
-            '    (property "Reference" "' + reference + '"',
-            ' (id ' + str(property_id) + ')',
-            ' (at 2.54 12.7 0)\n',
-            '      (effects (font (size 1.27 1.27)))\n',
-            '    )\n'
-        ])
-    )
-
-    # Свойство "Value"
-    property_id += 1
-    lyb_content.append(
-        ''.join([
-            '    (property "Value" "' + component_name + '"',
-            ' (id ' + str(property_id) + ')',
-            ' (at -10.16 11.43 0)\n',
-            '      (effects (font (size 1.27 1.27)))\n',
-            '    )\n'
-        ])
-    )
-
-    # Свойство "Footprint"
-    property_id += 1
-    lyb_content.append(
-        ''.join([
-            '    (property "Footprint" "' + footprint + '"',
-            ' (id ' + str(property_id) + ')',
-            ' (at 0 0 0)\n',
-            '      (effects (font (size 1.27 1.27)) hide)\n',
-            '    )\n'
-        ])
-    )
-
-    # Свойство "Datasheet"
-    property_id += 1
-    lyb_content.append(
-        ''.join([
-            '    (property "Datasheet" "' + datasheet + '"',
-            ' (id ' + str(property_id) + ')',
-            ' (at 0 0 0)\n',
-            '      (effects (font (size 1.27 1.27)) hide)\n',
-            '    )\n'
-        ])
-    )
+    index = 0
+    for data in properties:
+        lyb_content.append(
+            ''.join([
+                f'    (property "{data[0]}" "{data[1]}"',
+                f' (id {index})',
+                f' ({data[2]})\n',
+                f'      ({data[3]})\n',
+                '    )\n'
+            ])
+        )
+        index += 1
 
 
 # Добавляет информацию об одной части компонента
