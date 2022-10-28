@@ -33,7 +33,7 @@ def create_symbol(
 
     # w: Создает новый файл или перезаписывает уже имеющийся
     f = open(file_name, 'w')
-    f.write('\n'.join(lyb_content))
+    f.write(''.join(lyb_content))
     f.close()
 
 
@@ -48,7 +48,7 @@ def add_begin(
 ):
 
     # Версия библиотеки
-    lyb_content.append('(kicad_symbol_lib (version 20211014) (generator kicad_symbol_editor)')
+    lyb_content.append('(kicad_symbol_lib (version 20211014) (generator kicad_symbol_editor)\n')
 
     # Название символа компонента
     symbol_str = '  (symbol ' + '"' + component_name + '"'
@@ -63,6 +63,8 @@ def add_begin(
     else:
         symbol_str += ' (on_board no)'
 
+    symbol_str += '\n'
+
     lyb_content.append(symbol_str)
 
     # Свойство "Reference"
@@ -73,27 +75,45 @@ def add_begin(
             ' (id ' + str(property_id) + ')',
             ' (at 2.54 12.7 0)\n',
             '      (effects (font (size 1.27 1.27)))\n',
-            '    )'
+            '    )\n'
         ])
     )
 
     # Свойство "Value"
     property_id += 1
-    lyb_content.append('    (property "Value" "' + component_name + '" (id ' + str(property_id) + ') (at -10.16 11.43 0)')
-    lyb_content.append('      (effects (font (size 1.27 1.27)))')
-    lyb_content.append('    )')
+    lyb_content.append(
+        ''.join([
+            '    (property "Value" "' + component_name + '"',
+            ' (id ' + str(property_id) + ')',
+            ' (at -10.16 11.43 0)\n',
+            '      (effects (font (size 1.27 1.27)))\n',
+            '    )\n'
+        ])
+    )
 
     # Свойство "Footprint"
     property_id += 1
-    lyb_content.append('    (property "Footprint" "' + footprint + '" (id ' + str(property_id) + ') (at 0 0 0)')
-    lyb_content.append('      (effects (font (size 1.27 1.27)) hide)')
-    lyb_content.append('    )')
+    lyb_content.append(
+        ''.join([
+            '    (property "Footprint" "' + footprint + '"',
+            ' (id ' + str(property_id) + ')',
+            ' (at 0 0 0)\n',
+            '      (effects (font (size 1.27 1.27)) hide)\n',
+            '    )\n'
+        ])
+    )
 
     # Свойство "Datasheet"
     property_id += 1
-    lyb_content.append('    (property "Datasheet" "' + footprint + '" (id ' + str(property_id) + ') (at 0 0 0)')
-    lyb_content.append('      (effects (font (size 1.27 1.27)) hide)')
-    lyb_content.append('    )')
+    lyb_content.append(
+        ''.join([
+            '    (property "Datasheet" "' + datasheet + '"',
+            ' (id ' + str(property_id) + ')',
+            ' (at 0 0 0)\n',
+            '      (effects (font (size 1.27 1.27)) hide)\n',
+            '    )\n'
+        ])
+    )
 
 
 # Добавляет информацию об одной части компонента
@@ -120,5 +140,10 @@ def add_pin(
 
 # Добавляет конец библиотеки
 def add_end():
-    lyb_content.append('  )')
-    lyb_content.append(')')
+
+    lyb_content.append(
+        ''.join([
+            '  )\n',
+            ')\n'
+        ])
+    )
